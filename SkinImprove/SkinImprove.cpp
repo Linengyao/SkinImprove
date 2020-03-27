@@ -2,10 +2,59 @@
 //
 
 #include <iostream>
-
+#include <opencv.hpp>
+using namespace cv;
+using namespace std;
 int main()
 {
-    std::cout << "Hello World!\n";
+	VideoCapture cap(0);
+
+	double scale = 0.5;
+
+	double i_minH = 0;
+	double i_maxH = 20;
+	double i_minS = 43;
+	double i_maxS = 255;
+	double i_minV = 55;
+	double i_maxV = 255;
+
+	while (1)
+	{
+		Mat frame;
+		Mat hsvMat;
+		Mat detectMat;
+
+		Mat MedMat;
+		Mat DipMat;
+		//缩放
+		cap >> frame;
+		Size ResImgSiz = Size(frame.cols * scale, frame.rows * scale);
+		Mat rFrame = Mat(ResImgSiz, frame.type());
+		resize(frame, rFrame, ResImgSiz, INTER_LINEAR);
+
+		//转换图像格式
+		cvtColor(rFrame, hsvMat, COLOR_BGR2HSV);
+
+		rFrame.copyTo(detectMat);
+
+		//限定范围
+		cv::inRange(hsvMat, Scalar(i_minH, i_minS, i_minV), Scalar(i_maxH, i_maxS, i_maxV), detectMat);
+
+		//磨皮
+		medianBlur(rFrame, MedMat, 15);
+
+		rFrame.copyTo(DipMat);
+		MedMat.copyTo(DipMat, detectMat);
+
+		imshow("white: in the range", detectMat);
+		imshow("frame", rFrame);
+		imshow("display", DipMat);
+
+
+		waitKey(30);
+	}
+
+    //std::cout << "Hello World!\n";
 }
 
 // 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单
